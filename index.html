@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economic Development Quiz</title>
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* A simple style for the correct/incorrect feedback */
+        .correct {
+            background-color: #d1fae5; /* Green-100 */
+            border-color: #10b981; /* Green-500 */
+        }
+        .incorrect {
+            background-color: #fee2e2; /* Red-100 */
+            border-color: #ef4444; /* Red-500 */
+        }
+        .selected {
+             border-width: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-3xl">
+        
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+            
+            <!-- Header -->
+            <div id="quiz-header" class="mb-6">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Economic Development Quiz</h1>
+                <p class="text-gray-600">Based on Topic 6: Economic Development</p>
+                <div class="h-2 w-full bg-gray-200 rounded-full mt-4">
+                    <div id="progress-bar" class="h-2 bg-blue-500 rounded-full" style="width: 0%;"></div>
+                </div>
+                <div id="progress-text" class="text-sm text-gray-500 text-right mt-1">Question 0 / 10</div>
+            </div>
+
+            <!-- Question Area -->
+            <div id="question-area" class="mb-6">
+                <h2 id="question-text" class="text-xl font-semibold text-gray-700 mb-4">Question text will load here...</h2>
+                <div id="options-container" class="space-y-3">
+                    <!-- Options will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Rationale Area (hidden by default) -->
+            <div id="rationale-area" class="hidden p-4 rounded-md mb-6">
+                <h3 id="rationale-title" class="font-bold text-lg mb-2"></h3>
+                <p id="rationale-text" class="text-gray-700"></p>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div id="navigation-buttons" class="flex justify-between items-center">
+                <button id="check-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow transition duration-300 disabled:opacity-50" disabled>
+                    Check Answer
+                </button>
+                <button id="next-btn" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-6 rounded-lg shadow transition duration-300 hidden">
+                    Next Question
+                </button>
+            </div>
+
+            <!-- Results Screen (hidden by default) -->
+            <div id="results-screen" class="hidden text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Quiz Complete!</h2>
+                <p class="text-xl text-gray-600 mb-6">You scored <span id="score-text" class="font-bold">0</span> out of <span id="total-text" class="font-bold">10</span>.</p>
+                <button id="restart-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg shadow transition duration-300">
+                    Restart Quiz
+                </button>
+            </div>
+
+        </div>
+
+        <footer class="text-center text-gray-500 text-sm mt-6">
+            A simple quiz generator.
+        </footer>
+
+    </div>
+
+    <!-- 2. JavaScript Logic -->
+    <script>
+        // 2.1. Quiz Data
+        const quizData = [
+            {
+                question: "What is the Gini coefficient used to measure?",
+                options: [
+                    "Economic growth rate",
+                    "Income or wealth inequality",
+                    "Absolute poverty levels",
+                    "The human development index"
+                ],
+                correct: 1, // Index of the correct answer
+                rationale: "The Gini coefficient is a statistical measure of distribution, most commonly used to represent the income or wealth inequality within a nation or social group."
+            },
+            {
+                question: "Absolute poverty is defined as:",
+                options: [
+                    "Having less income than the national average.",
+                    "A condition where household income is insufficient to afford basic necessities.",
+                    "The feeling of being poor compared to one's neighbors.",
+                    "A Gini coefficient above 0.5."
+                ],
+                correct: 1,
+                rationale: "Absolute poverty (or extreme poverty) measures poverty in relation to the amount of money necessary to meet basic needs such as food, clothing, and shelter. It is a fixed standard."
+            },
+            {
+                question: "The Human Development Index (HDI) combines which three dimensions?",
+                options: [
+                    "GDP, inflation, and unemployment.",
+                    "Life expectancy, education, and per capita income.",
+                    "Poverty, inequality, and economic growth.",
+                    "Trade balance, foreign investment, and national debt."
+                ],
+                correct: 1,
+                rationale: "The HDI, created by the UN, is a composite index that measures three key dimensions of human development: a long and healthy life (life expectancy), access to knowledge (education), and a decent standard of living (per capita income)."
+            },
+            {
+                question: "Which of the following is considered an explanatory factor for economic imbalances in developing countries?",
+                options: [
+                    "High levels of political stability.",
+                    "A highly diversified economy.",
+                    "Dependence on the export of a few primary commodities.",
+                    "Strong and independent legal institutions."
+                ],
+                correct: 2,
+                rationale: "Many developing countries depend on exporting one or two primary commodities (like oil or coffee). This makes their economies highly vulnerable to global price fluctuations, creating economic imbalances."
+            },
+            {
+                question: "The 'Dual Sector Model' (like the Lewis model) explains development as a process of:",
+                options: [
+                    "Transferring surplus labor from a traditional agricultural sector to a modern industrial sector.",
+                    "Balancing the government budget and controlling inflation.",
+                    "Increasing international trade and reducing tariffs.",
+                    "Promoting small businesses and entrepreneurship."
+                ],
+                correct: 0,
+                rationale: "The Lewis model posits a dual economy with a traditional (subsistence) sector and a modern (capitalist) sector. Development occurs as labor moves from the traditional sector to the modern one."
+            },
+            {
+                question: "Which institution is PART of the World Bank Group?",
+                options: [
+                    "The International Monetary Fund (IMF)",
+                    "The World Trade Organization (WTO)",
+                    "The International Development Association (IDA)",
+                    "The Organisation for Economic Co-operation and Development (OECD)"
+                ],
+                correct: 2,
+                rationale: "The World Bank Group is composed of five institutions. The International Development Association (IDA) is one of them, focusing on providing loans and grants to the world's poorest countries."
+            },
+            {
+                question: "What is the primary role of the International Bank for Reconstruction and Development (IBRD)?",
+                options: [
+                    "To provide emergency humanitarian aid after natural disasters.",
+                    "To lend to middle-income and creditworthy low-income countries for development projects.",
+                    "To regulate global financial markets.",
+                    "To set international trade rules."
+                ],
+                correct: 1,
+                rationale: "The IBRD is the World Bank's original institution. Its primary purpose is to provide loans and advisory services to middle-income and creditworthy poorer countries to promote sustainable development."
+            },
+            {
+                question: "A 'poverty trap' refers to a situation where:",
+                options: [
+                    "A country's government is too corrupt to manage aid effectively.",
+                    "People are poor because they do not work hard enough.",
+                    "A mechanism that causes poverty to be self-perpetuating, making it very difficult to escape.",
+                    "A government policy that intentionally keeps a portion of the population in poverty."
+                ],
+                correct: 2,
+                rationale: "A poverty trap is any self-reinforcing cycle (like low income leading to poor health and low productivity, which in turn keeps income low) that locks individuals or families in poverty."
+            },
+            {
+                question: "What does 'terms of trade' refer to in international economics?",
+                options: [
+                    "The legal agreements and treaties between trading nations.",
+                    "The ratio of a country's export prices to its import prices.",
+                    "The total volume of goods and services a country exports.",
+                    "The balance between a country's exports and imports (trade balance)."
+                ],
+                correct: 1,
+                rationale: "The terms of trade (TOT) is a measure of how much a country gets in imports for a given amount of exports. It's calculated as (Index of Export Prices / Index of Import Prices)."
+            },
+            {
+                question: "What are the 'Sustainable Development Goals' (SDGs)?",
+                options: [
+                    "A set of 17 global goals adopted by the World Bank to end poverty.",
+                    "A treaty on climate change signed in Paris.",
+                    "A set of 17 global goals adopted by all United Nations Member States to end poverty, protect the planet, and ensure prosperity for all by 2030.",
+                    "The internal operating goals of the International Monetary Fund."
+                ],
+                correct: 2,
+                rationale: "The SDGs are a universal call to action by the UN to address global challenges, including poverty, inequality, climate change, and justice, by the year 2030."
+            }
+        ];
+
+        // 2.2. DOM Elements
+        const quizContainer = document.getElementById('quiz-container');
+        const questionArea = document.getElementById('question-area');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const rationaleArea = document.getElementById('rationale-area');
+        const rationaleTitle = document.getElementById('rationale-title');
+        const rationaleText = document.getElementById('rationale-text');
+        const checkBtn = document.getElementById('check-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const resultsScreen = document.getElementById('results-screen');
+        const scoreText = document.getElementById('score-text');
+        const totalText = document.getElementById('total-text');
+        const restartBtn = document.getElementById('restart-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        // 2.3. Quiz State
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null; // To store the DOM element of the selected option
+
+        // 2.4. Functions
+        
+        /**
+         * Starts or restarts the quiz
+         */
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsScreen.classList.add('hidden');
+            questionArea.classList.remove('hidden');
+            quizContainer.querySelector('#quiz-header').classList.remove('hidden');
+            document.getElementById('navigation-buttons').classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            checkBtn.classList.remove('hidden');
+            
+            loadQuestion();
+        }
+
+        /**
+         * Loads the current question and options
+         */
+        function loadQuestion() {
+            // Reset state from previous question
+            selectedOption = null;
+            rationaleArea.classList.add('hidden');
+            checkBtn.disabled = true;
+            nextBtn.classList.add('hidden');
+            checkBtn.classList.remove('hidden');
+
+            // Get current question data
+            const question = quizData[currentQuestionIndex];
+            
+            // Update UI
+            questionText.textContent = question.question;
+            optionsContainer.innerHTML = ''; // Clear previous options
+            
+            // Update progress
+            progressText.textContent = `Question ${currentQuestionIndex + 1} / ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / quizData.length) * 100}%`;
+
+            // Create and append option buttons
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add(
+                    'w-full', 'text-left', 'p-4', 'border', 'border-gray-300', 
+                    'rounded-lg', 'hover:bg-gray-100', 'transition', 'duration-200'
+                );
+                button.dataset.index = index; // Store the option index
+                
+                button.addEventListener('click', () => selectOption(button, index));
+                
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        /**
+         * Handles option selection
+         */
+        function selectOption(button, index) {
+            // Remove 'selected' class from previously selected option
+            if (selectedOption) {
+                selectedOption.classList.remove('selected', 'border-blue-500');
+            }
+            
+            // Add 'selected' class to the new one
+            selectedOption = button;
+            selectedOption.classList.add('selected', 'border-blue-500');
+            
+            // Enable the check button
+            checkBtn.disabled = false;
+        }
+
+        /**
+         * Checks the selected answer
+         */
+        function checkAnswer() {
+            const question = quizData[currentQuestionIndex];
+            const selectedIndex = parseInt(selectedOption.dataset.index);
+            const correctIndex = question.correct;
+
+            // Disable all option buttons
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed');
+            });
+            
+            // Check if the answer is correct
+            if (selectedIndex === correctIndex) {
+                score++;
+                selectedOption.classList.add('correct');
+                rationaleTitle.textContent = "Correct!";
+                rationaleArea.classList.add('bg-green-100', 'border', 'border-green-300');
+                rationaleArea.classList.remove('bg-red-100', 'border-red-300');
+            } else {
+                selectedOption.classList.add('incorrect');
+                // Also highlight the correct answer
+                optionsContainer.children[correctIndex].classList.add('correct');
+                rationaleTitle.textContent = "Incorrect";
+                rationaleArea.classList.add('bg-red-100', 'border', 'border-red-300');
+                rationaleArea.classList.remove('bg-green-100', 'border-green-300');
+            }
+
+            // Show rationale
+            rationaleText.textContent = question.rationale;
+            rationaleArea.classList.remove('hidden');
+
+            // Toggle buttons
+            checkBtn.classList.add('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+        
+        /**
+         * Moves to the next question or shows results
+         */
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+        
+        /**
+         * Displays the final results screen
+         */
+        function showResults() {
+            questionArea.classList.add('hidden');
+            document.getElementById('navigation-buttons').classList.add('hidden');
+            rationaleArea.classList.add('hidden');
+            quizContainer.querySelector('#quiz-header').classList.add('hidden');
+            
+            resultsScreen.classList.remove('hidden');
+            scoreText.textContent = score;
+            totalText.textContent = quizData.length;
+        }
+
+        // 2.5. Event Listeners
+        checkBtn.addEventListener('click', checkAnswer);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+
+        // 2.6. Initial Quiz Load
+        startQuiz();
+    </script>
+</body>
+</html>
